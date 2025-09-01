@@ -1,1 +1,33 @@
+Exact AWS steps to deploy (in order) — follow your notes plus these fixes
+1. Create DynamoDB table UsersTable with partition key userId (string). Add one sample item with JSON as in your notes.
+
+2. Create Lambda function, paste the improved code, set environment variables:
+DDB_TABLE = UsersTable
+ALLOWED_ORIGIN = https://<your-cloudfront-domain> (or * for testing)
+
+
+3. Attach IAM Role to Lambda giving it dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem on the table (use a policy or attach AmazonDynamoDBFullAccess for quick test).
+
+4. Create API Gateway (REST API) and resource /users. Set METHODs:
+GET → Lambda Proxy Integration → save
+POST → Lambda Proxy
+PUT → Lambda Proxy
+DELETE → Lambda Proxy
+For each method, enable Use Lambda Proxy Integration
+
+
+5. Enable CORS for resource /users in API Gateway. When it prompts, enter your CloudFront domain (or *) and enable GET/POST/PUT/DELETE/OPTIONS. Save and Deploy API to prod stage. Copy the Invoke URL (e.g., https://xxx.execute-api.ap-south-1.amazonaws.com/prod).
+
+6. Update your frontend script.js to use API_BASE = "<invoke-url>" and upload updated index.html to S3.
+
+7. Create CloudFront distribution with S3 as origin. Configure origin access (OAC) per your notes. After distribution is deployed, set ALLOWED_ORIGIN to the CloudFront domain in Lambda env var (or allow * while testing).
+
+8. Invalidate CloudFront cache for /* after you reupload index.html to S3 so the browser sees new script.
+
+9. Test in browser: browse to CloudFront URL. Use devtools Console/Network to monitor requests and see responses. If you get CORS error, check that:
+API Gateway OPTIONS preflight returns 200 and includes Access-Control-Allow-Origin header.
+Lambda responses include CORS headers.
+
+
+10. Check CloudWatch Logs for the Lambda (prints from handler) to troubleshoot.
 
