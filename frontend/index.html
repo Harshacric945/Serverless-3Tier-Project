@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Serverless CRUD App</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f7f9fb; padding: 20px; }
+    h1 { text-align: center; color:#2c3e50; }
+    .container { max-width: 500px; margin: auto; background:#fff; padding:20px; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    label { display:block; margin-top:10px; font-weight: bold; }
+    input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
+    button { margin-top:15px; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; }
+    button:hover { opacity:0.9; }
+    .btn-create { background:#27ae60; color:white; }
+    .btn-read { background:#2980b9; color:white; }
+    .btn-update { background:#f39c12; color:white; }
+    .btn-delete { background:#c0392b; color:white; }
+    .result { margin-top:20px; padding:12px; border-radius:6px; display:none; }
+    .success { background:#e9f9ee; color:#27ae60; border:1px solid #27ae60; }
+    .error { background:#fdecea; color:#c0392b; border:1px solid #c0392b; }
+  </style>
+</head>
+<body>
+  <h1>Serverless CRUD App</h1>
+  <div class="container">
+    <label for="user_id">User ID:</label>
+    <input type="text" id="user_id" placeholder="Enter user ID">
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" placeholder="Enter user name">
+
+    <button class="btn-create" onclick="createUser()">Create User</button>
+    <button class="btn-read" onclick="readUser()">Read User</button>
+    <button class="btn-update" onclick="updateUser()">Update User</button>
+    <button class="btn-delete" onclick="deleteUser()">Delete User</button>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    // Replace with your API Gateway invoke URL, e.g. https://xxxx.execute-api.ap-south-1.amazonaws.com/prod
+    const API_BASE = "YOUR_API_GATEWAY_INVOKE_URL";
+    const resultDiv = document.getElementById("result");
+
+    function showResult(message, ok=true) {
+      resultDiv.style.display = "block";
+      resultDiv.className = "result " + (ok ? "success" : "error");
+      resultDiv.innerText = message;
+    }
+
+    async function createUser() {
+      const user_id = document.getElementById("user_id").value.trim();
+      const name = document.getElementById("name").value.trim();
+      if (!user_id || !name) { showResult("User ID and Name required", false); return; }
+      try {
+        const res = await fetch(API_BASE + "/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id, name })
+        });
+        const data = await res.json();
+        if (res.ok) showResult("✅ " + (data.message || "User created"));
+        else showResult("❌ " + JSON.stringify(data), false);
+      } catch (err) { showResult("❌ " + err.message, false); }
+    }
+
+    async function readUser() {
+      const user_id = document.getElementById("user_id").value.trim();
+      if (!user_id) { showResult("User ID required", false); return; }
+      try {
+        const res = await fetch(API_BASE + "/users?userId=" + encodeURIComponent(user_id));
+        const data = await res.json();
+        if (res.ok && data.item && Object.keys(data.item).length) showResult("✅ " + JSON.stringify(data.item));
+        else showResult("ℹ️ No record found", true);
+      } catch (err) { showResult("❌ " + err.message, false); }
+    }
+
+    async function updateUser() {
+      const user_id = document.getElementById("user_id").value.trim();
+      const name = document.getElementById("name").value.trim();
+      if (!user_id || !name) { showResult("User ID and Name required", false); return; }
+      try {
+        const res = await fetch(API_BASE + "/users", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id, name })
+        });
+        const data = await res.json();
+        if (res.ok) showResult("✅ " + (data.message || "User updated"));
+        else showResult("❌ " + JSON.stringify(data), false);
+      } catch (err) { showResult("❌ " + err.message, false); }
+    }
+
+    async function deleteUser() {
+      const user_id = document.getElementById("user_id").value.trim();
+      if (!user_id) { showResult("User ID required", false); return; }
+      try {
+        const res = await fetch(API_BASE + "/users?userId=" + encodeURIComponent(user_id), { method:"DELETE" });
+        const data = await res.json();
+        if (res.ok) showResult("✅ " + (data.message || "User deleted"));
+        else showResult("❌ " + JSON.stringify(data), false);
+      } catch (err) { showResult("❌ " + err.message, false); }
+    }
+  </script>
+</body>
+</html>
