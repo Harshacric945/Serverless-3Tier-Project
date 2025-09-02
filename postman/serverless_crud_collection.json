@@ -1,0 +1,79 @@
+{
+  "info": {
+    "name": "Serverless CRUD API",
+    "_postman_id": "abcd-efgh-1234",
+    "description": "Postman collection to test AWS Lambda + API Gateway + DynamoDB CRUD project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Item",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n \"id\": \"101\",\n \"name\": \"Harsha Item\",\n \"description\": \"First test item\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/items",
+          "host": ["{{base_url}}"],
+          "path": ["items"]
+        }
+      }
+    },
+    {
+      "name": "Get All Items",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/items",
+          "host": ["{{base_url}}"],
+          "path": ["items"]
+        }
+      }
+    },
+    {
+      "name": "Get Single Item",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/items/101",
+          "host": ["{{base_url}}"],
+          "path": ["items", "101"]
+        }
+      }
+    },
+    {
+      "name": "Update Item",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n \"name\": \"Harsha Updated\",\n \"description\": \"Updated description\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/items/101",
+          "host": ["{{base_url}}"],
+          "path": ["items", "101"]
+        }
+      }
+    },
+    {
+      "name": "Delete Item",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{base_url}}/items/101",
+          "host": ["{{base_url}}"],
+          "path": ["items", "101"]
+        }
+      }
+    }
+  ]
+}
