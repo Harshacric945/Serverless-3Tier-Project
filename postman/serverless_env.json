@@ -4,7 +4,7 @@
   "values": [
     {
       "key": "base_url",
-      "value": "https://abc123.execute-api.us-east-1.amazonaws.com/prod",
+      "value": "https://tu7a0aqxp6.execute-api.us-east-1.amazonaws.com/prod",
       "enabled": true
     }
   ],
