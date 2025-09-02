@@ -11,24 +11,37 @@ Amazon S3 + CloudFront (frontend hosting)
 Terraform (Infrastructure as Code)
 
  Deployment (Terraform)
+ 
 Clone this repo:
 
 git clone https://github.com/<your-username>/<your-repo>.git
+
 cd project-root/terraform
+
 Initialize Terraform:
 
 terraform init
+
 Deploy infrastructure:
 
 terraform apply -auto-approve
 
 
 API Testing with Postman
+
 Import Postman Files
+
 Open Postman App.
+
 Go to Import → Upload Files.
-Import:postman/serverless_crud_collection.json (collection of CRUD requests)postman/serverless_env.json (environment with base_url)
+
+Import:
+   
+   postman/serverless_crud_collection.json (collection of CRUD requests)
+   postman/serverless_env.json (environment with base_url)
+
 Set Environment
+
 In top-right corner of Postman → select Serverless Project Env.
 Update base_url with your API Gateway Invoke URL (e.g. https://abc123.execute-api.us-east-1.amazonaws.com/prod).
 
@@ -40,5 +53,5 @@ GET /items/{id} → Fetch single item
 PUT /items/{id} → Update item
 DELETE /items/{id} → Delete item
 
- Frontend Access
+Frontend Access
 Open your CloudFront URL in browser → frontend will call API Gateway → Lambda → DynamoDB.
