@@ -23,7 +23,14 @@ Deploy infrastructure:
 terraform apply -auto-approve
 
 
-API Testing with PostmanImport Postman FilesOpen Postman App.Go to Import → Upload Files.Import:postman/serverless_crud_collection.json (collection of CRUD requests)postman/serverless_env.json (environment with base_url)Set EnvironmentIn top-right corner of Postman → select Serverless Project Env.Update base_url with your API Gateway Invoke URL (e.g. https://abc123.execute-api.us-east-1.amazonaws.com/prod).
+API Testing with Postman
+Import Postman Files
+Open Postman App.
+Go to Import → Upload Files.
+Import:postman/serverless_crud_collection.json (collection of CRUD requests)postman/serverless_env.json (environment with base_url)
+Set Environment
+In top-right corner of Postman → select Serverless Project Env.
+Update base_url with your API Gateway Invoke URL (e.g. https://abc123.execute-api.us-east-1.amazonaws.com/prod).
 
 
 Run Requests
