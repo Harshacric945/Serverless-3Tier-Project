@@ -10,6 +10,9 @@ Amazon DynamoDB (NoSQL database)
 Amazon S3 + CloudFront (frontend hosting)
 Terraform (Infrastructure as Code)
 
+## Architecture Diagram
+![Architecture](images/Architecture.png)
+
  Deployment (Terraform)
  
 Clone this repo:
