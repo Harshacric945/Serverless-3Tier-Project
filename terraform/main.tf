@@ -18,8 +18,8 @@ resource "aws_iam_role" "lambda_exec" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         Principal = {
           Service = "lambda.amazonaws.com"
         }
@@ -41,9 +41,10 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 # Package Lambda
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/../lambda/lambda_function.py"
-  output_path = "${path.module}/../lambda/lambda_function.zip"
+  source_file = "${path.module}/lambda/lambda_function.py"
+  output_path = "${path.module}/lambda/lambda_function.zip"
 }
+
 
 # Lambda Function
 resource "aws_lambda_function" "crud" {
@@ -56,8 +57,8 @@ resource "aws_lambda_function" "crud" {
 
   environment {
     variables = {
-      TABLE_NAME      = aws_dynamodb_table.crud.name
-      ALLOWED_ORIGIN  = aws_cloudfront_distribution.frontend.domain_name
+      TABLE_NAME     = aws_dynamodb_table.crud.name
+      ALLOWED_ORIGIN = aws_cloudfront_distribution.frontend.domain_name
     }
   }
 }
@@ -172,11 +173,9 @@ resource "aws_lambda_permission" "api_gw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.crud.execution_arn}/*/*"
 }
-
-# Deployment
+#API Gateway Deployment + Stage
 resource "aws_api_gateway_deployment" "crud" {
   rest_api_id = aws_api_gateway_rest_api.crud.id
-  stage_name  = "prod"
 
   depends_on = [
     aws_api_gateway_integration.items_post,
@@ -187,35 +186,63 @@ resource "aws_api_gateway_deployment" "crud" {
   ]
 }
 
+resource "aws_api_gateway_stage" "prod" {
+  rest_api_id   = aws_api_gateway_rest_api.crud.id
+  deployment_id = aws_api_gateway_deployment.crud.id
+  stage_name    = "prod"
+}
+
+
 # S3 Bucket for Frontend
+resource "aws_s3_bucket" "frontend" {
+  bucket = "serverless-frontend-${random_id.bucket_id.hex}"
+
+  tags = {
+    Name        = "frontend"
+    Environment = "dev"
+  }
+}
+
 resource "random_id" "bucket_id" {
   byte_length = 4
 }
 
-resource "aws_s3_bucket" "frontend" {
-  bucket = "serverless-frontend-${random_id.bucket_id.hex}"
+resource "aws_s3_bucket_acl" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
   acl    = "public-read"
+}
 
-  website {
-    index_document = "index.html"
+
+resource "aws_s3_bucket_website_configuration" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
   }
 }
 
+
 # Replace API URL inside index.html
 data "template_file" "frontend" {
-  template = file("${path.module}/../frontend/index.template.html")
+  template = file("${path.module}/frontend/index.html")
 
   vars = {
     api_url = "https://${aws_api_gateway_rest_api.crud.id}.execute-api.${var.region}.amazonaws.com/prod"
   }
 }
 
-resource "aws_s3_bucket_object" "index" {
+
+resource "aws_s3_object" "index" {
   bucket       = aws_s3_bucket.frontend.id
   key          = "index.html"
   content      = data.template_file.frontend.rendered
   content_type = "text/html"
 }
+
 
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "frontend" {
@@ -253,4 +280,3 @@ resource "aws_cloudfront_distribution" "frontend" {
     cloudfront_default_certificate = true
   }
 }
-
